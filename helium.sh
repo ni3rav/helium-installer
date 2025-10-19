@@ -8,8 +8,8 @@ set -e
 APP_NAME="Helium"
 APP_COMMAND="helium"
 APP_IMAGE_NAME="helium.AppImage"
-APP_IMAGE_URL=""  # TODO: Replace with actual Helium download URL
-APP_ICON_URL=""   # TODO: Replace with actual Helium icon URL
+GITHUB_REPO="imputnet/helium-linux"
+APP_ICON_URL=""   # TODO: Replace with actual Helium icon URL if available
 INSTALL_DIR="$HOME/.local/bin"
 DESKTOP_ENTRY_DIR="$HOME/.local/share/applications"
 ICON_DIR="$HOME/.local/share/icons"
@@ -43,24 +43,55 @@ command_exists() {
 }
 
 get_latest_version() {
-    # TODO: implement version checking logic
-    echo "latest"
+    print_status "Fetching latest version from GitHub..."
+    local version
+    
+    if command_exists curl; then
+        version=$(curl -fsSL "https://api.github.com/repos/$GITHUB_REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    elif command_exists wget; then
+        version=$(wget -qO- "https://api.github.com/repos/$GITHUB_REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    else
+        print_error "Neither curl nor wget is available"
+        exit 1
+    fi
+    
+    if [[ -z "$version" ]]; then
+        print_error "Failed to fetch latest version"
+        exit 1
+    fi
+    
+    echo "$version"
 }
 
 get_stable_version() {
-    # TODO: implement stable version checking logic
-    echo "stable"
+    # For now, stable is the same as latest
+    get_latest_version
+}
+
+get_download_url() {
+    local version="$1"
+    # URL format: https://github.com/imputnet/helium-linux/releases/download/VERSION/helium-VERSION-x86_64.AppImage
+    echo "https://github.com/$GITHUB_REPO/releases/download/$version/helium-$version-x86_64.AppImage"
 }
 
 get_current_version() {
     local appimage_path="$INSTALL_DIR/$APP_IMAGE_NAME"
     
     if [[ -f "$appimage_path" ]]; then
-        # TODO: implement version extraction from AppImage
-        echo "unknown"
+        # Try to extract version from filename in the backup or use a version file
+        if [[ -f "$INSTALL_DIR/.helium_version" ]]; then
+            cat "$INSTALL_DIR/.helium_version"
+        else
+            echo "unknown"
+        fi
     else
         echo "not_installed"
     fi
+}
+
+save_version() {
+    local version="$1"
+    echo "$version" > "$INSTALL_DIR/.helium_version"
 }
 
 download_file() {
@@ -86,14 +117,19 @@ create_directories() {
 }
 
 update_helium() {
-    local version="$1"
+    local version_type="$1"
+    local version
     
-    print_status "Updating $APP_NAME to $version version..."
-    
-    if [[ -z "$APP_IMAGE_URL" ]]; then
-        print_error "APP_IMAGE_URL is not set. Please update the script with the correct download URL."
-        exit 1
+    if [[ "$version_type" == "latest" ]]; then
+        version=$(get_latest_version)
+    else
+        version=$(get_stable_version)
     fi
+    
+    print_status "Updating $APP_NAME to version $version..."
+    
+    local download_url=$(get_download_url "$version")
+    print_status "Download URL: $download_url"
     
     local appimage_path="$INSTALL_DIR/$APP_IMAGE_NAME"
     if [[ -f "$appimage_path" ]]; then
@@ -102,7 +138,7 @@ update_helium() {
     fi
     
     print_status "Downloading $APP_NAME $version..."
-    download_file "$APP_IMAGE_URL" "$appimage_path.new"
+    download_file "$download_url" "$appimage_path.new"
     
     if [[ -f "$appimage_path.new" ]]; then
         chmod +x "$appimage_path.new"
@@ -112,9 +148,12 @@ update_helium() {
         fi
         mv "$appimage_path.new" "$appimage_path"
         
+        # Save the version
+        save_version "$version"
+        
         update_desktop_entry
         
-        print_success "$APP_NAME updated to $version version"
+        print_success "$APP_NAME updated to version $version"
         
         if [[ -f "$appimage_path.backup" ]]; then
             rm "$appimage_path.backup"

@@ -13,8 +13,8 @@ NC='\033[0m'
 APP_NAME="Helium"
 APP_COMMAND="helium"
 APP_IMAGE_NAME="helium.AppImage"
-APP_IMAGE_URL=""  # TODO: Replace with actual Helium download URL
-APP_ICON_URL=""   # TODO: Replace with actual Helium icon URL
+GITHUB_REPO="imputnet/helium-linux"
+APP_ICON_URL=""   # TODO: Replace with actual Helium icon URL if available
 INSTALL_DIR="$HOME/.local/bin"
 DESKTOP_ENTRY_DIR="$HOME/.local/share/applications"
 ICON_DIR="$HOME/.local/share/icons"
@@ -82,6 +82,38 @@ download_file() {
     fi
 }
 
+get_latest_version() {
+    print_status "Fetching latest version from GitHub..."
+    local version
+    
+    if command_exists curl; then
+        version=$(curl -fsSL "https://api.github.com/repos/$GITHUB_REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    elif command_exists wget; then
+        version=$(wget -qO- "https://api.github.com/repos/$GITHUB_REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    else
+        print_error "Neither curl nor wget is available"
+        exit 1
+    fi
+    
+    if [[ -z "$version" ]]; then
+        print_error "Failed to fetch latest version"
+        exit 1
+    fi
+    
+    echo "$version"
+}
+
+get_download_url() {
+    local version="$1"
+    # URL format: https://github.com/imputnet/helium-linux/releases/download/VERSION/helium-VERSION-x86_64.AppImage
+    echo "https://github.com/$GITHUB_REPO/releases/download/$version/helium-$version-x86_64.AppImage"
+}
+
+save_version() {
+    local version="$1"
+    echo "$version" > "$INSTALL_DIR/.helium_version"
+}
+
 install_main_script() {
     print_status "Downloading $APP_NAME script..."
     
@@ -107,21 +139,27 @@ check_path() {
 install_helium() {
     print_status "Installing $APP_NAME..."
     
-    if [[ -z "$APP_IMAGE_URL" ]]; then
-        print_error "APP_IMAGE_URL is not set. Please update the script with the correct download URL."
-        exit 1
-    fi
+    # Get the latest version
+    local version=$(get_latest_version)
+    print_success "Latest version: $version"
+    
+    # Get the download URL
+    local download_url=$(get_download_url "$version")
+    print_status "Download URL: $download_url"
     
     print_status "Downloading $APP_NAME AppImage..."
-    download_file "$APP_IMAGE_URL" "$INSTALL_DIR/$APP_IMAGE_NAME"
+    download_file "$download_url" "$INSTALL_DIR/$APP_IMAGE_NAME"
     chmod +x "$INSTALL_DIR/$APP_IMAGE_NAME"
+    
+    # Save the version
+    save_version "$version"
     
     if [[ -n "$APP_ICON_URL" ]]; then
         print_status "Downloading $APP_NAME icon..."
         download_file "$APP_ICON_URL" "$ICON_DIR/helium.png"
     fi
     
-    print_success "$APP_NAME installed successfully"
+    print_success "$APP_NAME version $version installed successfully"
 }
 
 create_desktop_entry() {

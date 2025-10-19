@@ -87,6 +87,11 @@ remove_main_script() {
 remove_appimage() {
     local appimage_path="$INSTALL_DIR/$APP_IMAGE_NAME"
     remove_file "$appimage_path"
+    
+    local version_file="$INSTALL_DIR/.helium_version"
+    if exists "$version_file"; then
+        remove_file "$version_file"
+    fi
 }
 
 remove_desktop_entry() {
