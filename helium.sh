@@ -255,8 +255,11 @@ launch_helium() {
     # Create directories if they don't exist
     create_directories
     
-    # Launch the application with all passed arguments
-    exec "$appimage_path" "$@"
+    # Launch the application in background with output redirected to /dev/null
+    nohup "$appimage_path" "$@" > /dev/null 2>&1 &
+    
+    # Detach from the terminal
+    disown
 }
 
 # Main function
