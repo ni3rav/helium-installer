@@ -83,7 +83,7 @@ download_file() {
 }
 
 get_latest_version() {
-    print_status "Fetching latest version from GitHub..."
+    print_status "Fetching latest version from GitHub..." >&2
     local version
     
     if command_exists curl; then

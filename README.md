@@ -41,7 +41,7 @@ Or:
 curl -fsSL https://raw.githubusercontent.com/ni3rav/helium-installer/main/uninstall.sh | bash
 ```
 
-## 📋 Requirements
+## Requirements
 
 - A Linux system
 - `curl` or `wget` (you probably have one)
@@ -54,6 +54,7 @@ Because clicking through GitHub releases, downloading AppImages, making them exe
 1. Boring
 2. Error-prone
 3. Something a script should do
+4. I love wasting my Cursor credits
 
 ## Issues?
 
