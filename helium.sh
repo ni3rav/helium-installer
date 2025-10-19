@@ -206,12 +206,29 @@ show_version() {
     fi
 }
 
+# Function to uninstall Helium
+uninstall_helium() {
+    local uninstall_url="https://raw.githubusercontent.com/yourusername/helium-installer/main/uninstall.sh"
+    
+    print_status "Downloading uninstaller..."
+    
+    if command_exists curl; then
+        curl -fsSL "$uninstall_url" | bash
+    elif command_exists wget; then
+        wget -qO- "$uninstall_url" | bash
+    else
+        print_error "Neither curl nor wget is available"
+        exit 1
+    fi
+}
+
 # Function to show help
 show_help() {
     echo "Usage: $APP_COMMAND [options] [arguments...]"
     echo
     echo "Options:"
     echo "  --update [version]    Update $APP_NAME (stable|latest)"
+    echo "  --uninstall           Uninstall $APP_NAME"
     echo "  --version, -v         Show current version"
     echo "  --help, -h            Show this help message"
     echo
@@ -219,6 +236,7 @@ show_help() {
     echo "  $APP_COMMAND                    # Launch $APP_NAME"
     echo "  $APP_COMMAND --update           # Update to stable version"
     echo "  $APP_COMMAND --update latest    # Update to latest version"
+    echo "  $APP_COMMAND --uninstall        # Uninstall $APP_NAME"
     echo "  $APP_COMMAND --version          # Show version"
     echo "  $APP_COMMAND file.txt           # Open file in $APP_NAME"
     echo "  $APP_COMMAND --new-window       # Open new window"
@@ -256,6 +274,9 @@ main() {
                 print_error "Use 'stable' or 'latest'"
                 exit 1
             fi
+            ;;
+        --uninstall)
+            uninstall_helium
             ;;
         --version|-v)
             show_version
