@@ -43,7 +43,6 @@ command_exists() {
 }
 
 get_latest_version() {
-    print_status "Fetching latest version from GitHub..." >&2
     local version
     
     if command_exists curl; then
@@ -120,6 +119,7 @@ update_helium() {
     local version_type="$1"
     local version
     
+    print_status "Fetching latest version from GitHub..."
     if [[ "$version_type" == "latest" ]]; then
         version=$(get_latest_version)
     else

@@ -83,7 +83,6 @@ download_file() {
 }
 
 get_latest_version() {
-    print_status "Fetching latest version from GitHub..." >&2
     local version
     
     if command_exists curl; then
@@ -140,6 +139,7 @@ install_helium() {
     print_status "Installing $APP_NAME..."
     
     # Get the latest version
+    print_status "Fetching latest version from GitHub..."
     local version=$(get_latest_version)
     print_success "Latest version: $version"
     
