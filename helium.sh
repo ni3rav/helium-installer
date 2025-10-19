@@ -208,7 +208,7 @@ show_version() {
 
 # Function to uninstall Helium
 uninstall_helium() {
-    local uninstall_url="https://raw.githubusercontent.com/yourusername/helium-installer/main/uninstall.sh"
+    local uninstall_url="https://raw.githubusercontent.com/ni3rav/helium-installer/main/uninstall.sh"
     
     print_status "Downloading uninstaller..."
     
@@ -248,7 +248,7 @@ launch_helium() {
     
     if [[ ! -f "$appimage_path" ]]; then
         print_error "$APP_NAME is not installed"
-        print_status "Run the installer first: curl -fsSL https://raw.githubusercontent.com/yourusername/helium-installer/main/install.sh | bash"
+        print_status "Run the installer first: curl -fsSL https://raw.githubusercontent.com/ni3rav/helium-installer/main/install.sh | bash"
         exit 1
     fi
     

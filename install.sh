@@ -18,7 +18,7 @@ APP_ICON_URL="https://raw.githubusercontent.com/imputnet/helium/refs/heads/main/
 INSTALL_DIR="$HOME/.local/bin"
 DESKTOP_ENTRY_DIR="$HOME/.local/share/applications"
 ICON_DIR="$HOME/.local/share/icons"
-SCRIPT_URL="https://raw.githubusercontent.com/yourusername/helium-installer/main/helium.sh"
+SCRIPT_URL="https://raw.githubusercontent.com/ni3rav/helium-installer/main/helium.sh"
 
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
