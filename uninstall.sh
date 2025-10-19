@@ -178,15 +178,12 @@ show_help() {
     echo "Options:"
     echo "  --help, -h     Show this help message"
     echo "  --version      Show uninstaller version"
-    echo "  --force        Skip confirmation prompts"
     echo
     echo "This script will remove $APP_NAME and all associated files."
     echo "You will be prompted before removing configuration and cache files."
 }
 
 main() {
-    local force=false
-    
     while [[ $# -gt 0 ]]; do
         case $1 in
             --help|-h)
@@ -196,10 +193,6 @@ main() {
             --version|-v)
                 echo "$APP_NAME Uninstaller v1.0.0"
                 exit 0
-                ;;
-            --force)
-                force=true
-                shift
                 ;;
             *)
                 print_error "Unknown option: $1"
@@ -214,13 +207,6 @@ main() {
     
     check_installation
     
-    if [[ "$force" != true ]]; then
-        if ! confirm "Are you sure you want to uninstall $APP_NAME?"; then
-            print_status "Uninstall cancelled"
-            exit 0
-        fi
-    fi
-    
     echo
     print_status "Removing $APP_NAME components..."
     
@@ -229,14 +215,9 @@ main() {
     remove_desktop_entry
     remove_icon
     
-    if [[ "$force" != true ]]; then
-        echo
-        remove_config
-        remove_cache
-    else
-        remove_directory "$CONFIG_DIR"
-        remove_directory "$CACHE_DIR"
-    fi
+    echo
+    remove_config
+    remove_cache
     
     show_summary
 }
