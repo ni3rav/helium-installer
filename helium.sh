@@ -209,13 +209,14 @@ show_version() {
 # Function to uninstall Helium
 uninstall_helium() {
     local uninstall_url="https://raw.githubusercontent.com/ni3rav/helium-installer/main/uninstall.sh"
+    local args="$@"
     
     print_status "Downloading uninstaller..."
     
     if command_exists curl; then
-        curl -fsSL "$uninstall_url" | bash
+        curl -fsSL "$uninstall_url" | bash -s -- $args
     elif command_exists wget; then
-        wget -qO- "$uninstall_url" | bash
+        wget -qO- "$uninstall_url" | bash -s -- $args
     else
         print_error "Neither curl nor wget is available"
         exit 1
@@ -228,18 +229,19 @@ show_help() {
     echo
     echo "Options:"
     echo "  --update [version]    Update $APP_NAME (stable|latest)"
-    echo "  --uninstall           Uninstall $APP_NAME"
+    echo "  --uninstall [--force] Uninstall $APP_NAME (--force skips prompts)"
     echo "  --version, -v         Show current version"
     echo "  --help, -h            Show this help message"
     echo
     echo "Examples:"
-    echo "  $APP_COMMAND                    # Launch $APP_NAME"
-    echo "  $APP_COMMAND --update           # Update to stable version"
-    echo "  $APP_COMMAND --update latest    # Update to latest version"
-    echo "  $APP_COMMAND --uninstall        # Uninstall $APP_NAME"
-    echo "  $APP_COMMAND --version          # Show version"
-    echo "  $APP_COMMAND file.txt           # Open file in $APP_NAME"
-    echo "  $APP_COMMAND --new-window       # Open new window"
+    echo "  $APP_COMMAND                      # Launch $APP_NAME"
+    echo "  $APP_COMMAND --update             # Update to stable version"
+    echo "  $APP_COMMAND --update latest      # Update to latest version"
+    echo "  $APP_COMMAND --uninstall          # Uninstall $APP_NAME (interactive)"
+    echo "  $APP_COMMAND --uninstall --force  # Uninstall without prompts"
+    echo "  $APP_COMMAND --version            # Show version"
+    echo "  $APP_COMMAND file.txt             # Open file in $APP_NAME"
+    echo "  $APP_COMMAND --new-window         # Open new window"
 }
 
 # Function to launch Helium
@@ -279,7 +281,8 @@ main() {
             fi
             ;;
         --uninstall)
-            uninstall_helium
+            shift  # Remove --uninstall from args
+            uninstall_helium "$@"  # Pass remaining args (like --force)
             ;;
         --version|-v)
             show_version
