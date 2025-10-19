@@ -9,7 +9,7 @@ APP_NAME="Helium"
 APP_COMMAND="helium"
 APP_IMAGE_NAME="helium.AppImage"
 GITHUB_REPO="imputnet/helium-linux"
-APP_ICON_URL=""   # TODO: Replace with actual Helium icon URL if available
+APP_ICON_URL="https://raw.githubusercontent.com/imputnet/helium/refs/heads/main/resources/branding/app_icon/raw.png"
 INSTALL_DIR="$HOME/.local/bin"
 DESKTOP_ENTRY_DIR="$HOME/.local/share/applications"
 ICON_DIR="$HOME/.local/share/icons"
@@ -173,6 +173,11 @@ update_desktop_entry() {
     local icon_path=""
     if [[ -n "$APP_ICON_URL" ]]; then
         icon_path="$ICON_DIR/helium.png"
+        # Download icon if it doesn't exist
+        if [[ ! -f "$icon_path" ]]; then
+            print_status "Downloading $APP_NAME icon..."
+            download_file "$APP_ICON_URL" "$icon_path"
+        fi
     fi
     
     cat > "$DESKTOP_ENTRY_DIR/helium.desktop" << EOF
