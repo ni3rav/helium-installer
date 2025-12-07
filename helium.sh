@@ -183,7 +183,7 @@ update_desktop_entry() {
     cat > "$DESKTOP_ENTRY_DIR/helium.desktop" << EOF
 [Desktop Entry]
 Name=$APP_NAME
-Comment=AI-powered web browser
+Comment=Internet without interruptions
 Exec=$INSTALL_DIR/$APP_IMAGE_NAME
 Icon=$icon_path
 Type=Application
